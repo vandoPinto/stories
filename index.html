@@ -1,0 +1,328 @@
+<style>
+  body {
+    display: flex;
+    margin: auto;
+    backdrop-filter: blur(50px);
+    background-size: cover;
+    height: 100%;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    background-image: url(img/img1.jpg);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .navegacao {
+    display: flex;
+    width: 520px;
+    justify-content: space-around;
+    position: absolute;
+    align-items: center;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  .slide img {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+  }
+
+  .slide {
+    display: flex;
+    max-width: 450px;
+    height: 100%;
+    margin: auto auto;
+    box-shadow: 0 4px 20px 2px rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  video {
+    width: 85%;
+  }
+
+  p {
+    font-family: "Proxima Nova", "Roboto", Arial, sans-serif;
+    color: white;
+    text-align: center;
+    font-size: 25px;
+  }
+
+  .texto {
+    position: absolute;
+    bottom: 10px;
+    margin: auto;
+    width: 300px;
+  }
+
+  .container-texto {
+    width: 450px;
+    height: 680px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #volta,
+  #avanca {
+    border-radius: 0px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .progresso {
+    width: 450px;
+    height: 5px;
+    position: absolute;
+    top: 1%;
+    display: flex;
+    grid-column: 1 / 3;
+  }
+
+  .progresso > div {
+    flex: 1;
+    height: 3px;
+    margin: 5px;
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+    width: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+  .dentro {
+    flex: 1;
+    height: 3px;
+    border-radius: 3px;
+    overflow: hidden;
+
+    display: inline-block;
+    /* width: 0; */
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+</style>
+
+<body>
+  <div class="navegacao">
+    <img id="volta" src="img/volta.png" />
+    <div>
+      <div class="progresso"></div>
+      <div class="slide" id="janela_1">
+        <img src="img/img1.jpg" />
+        <div class="texto">
+          <p>
+            "A preguiça é a mãe do progresso. Se o homem não tivesse preguiça de
+            caminhar, não teria inventado a roda. - Georg Christoph Lichtenberg"
+          </p>
+        </div>
+      </div>
+      <div class="slide" id="janela_2">
+        <img src="img/img2.jpg" />
+        <div class="texto">
+          <p style="color: yellow">
+            "Nas profundezas da alma reside a sabedoria oculta, aguardando ser
+            revelada pela jornada do autoconhecimento. - Georg Christoph
+            Lichtenberg"
+          </p>
+        </div>
+      </div>
+      <div class="slide" id="janela_3">
+        <img src="img/img3.jpg" />
+        <div class="texto">
+          <p style="color: yellow">
+            "Não podemos fazer com que as pessoas se tornem racionais, mas
+            podemos ajudá-las a serem lógicas. - Georg Christoph Lichtenberg"
+          </p>
+        </div>
+      </div>
+      <div class="slide" id="janela_4">
+        <img src="img/img4.jpg" />
+      </div>
+      <div class="slide" id="janela_5">
+        <video src="video/video1.mp4" controls="" autoplay="" loop=""></video>
+      </div>
+      <div class="slide" id="janela_6">
+        <video src="video/video2.mp4" controls="" autoplay="" loop=""></video>
+      </div>
+      <div class="slide" id="janela_7">
+        <div class="container-texto">
+          <p>"Acredite, persista e conquiste. Seu potencial é ilimitado."</p>
+        </div>
+      </div>
+    </div>
+    <img id="avanca" src="img/avanca.png" />
+  </div>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(() => {
+    let janelas = $(document).find("[id^=janela]");
+    janelas.mouseover(pausarTimer).mouseout(retomarTimer);
+    let avanca = $(document)
+      .find("[id^=avanca]")
+      .on("click", avancar)
+      .css("cursor", "pointer");
+    let volta = $(document)
+      .find("[id^=volta]")
+      .on("click", voltar)
+      .css("cursor", "pointer");
+    let contador = 1;
+
+    $(volta).css({
+      opacity: "0.6",
+      cursor: "auto",
+    });
+
+    apagarJanelas();
+    pegarBarras();
+    animacaoBarra();
+    $(document).find("[id^=janela_1]").show();
+
+    function pegarBarras() {
+      $(document)
+        .find("[class^=slide]")
+        .map((index, obj) => {
+          var gridItem = $("<div>")
+            .addClass("barra")
+            .append($("<div>").addClass("dentro"));
+          $(".progresso").append(gridItem);
+        });
+    }
+
+    function animacaoBarra(i = 0, tempo = 5000) {
+      let barras = $(document).find(".dentro");
+      var barra = barras[i];
+      var duracaoAnimacao = tempo;
+
+      barras.map((index, elemento) => {
+        if (index == i) {
+          rodarTimer(barra, tempo);
+        } else if (index < i) {
+          $(elemento).css("width", "100%");
+        } else {
+          $(elemento).css("width", "0%");
+        }
+      });
+    }
+
+    var timer;
+    var isPaused = false;
+
+    function rodarTimer(barra, tempo) {
+      var width = 0;
+
+      if (timer) {
+        clearInterval(timer);
+      }
+
+      timer = setInterval(() => {
+        if (isPaused) {
+          return;
+        }
+
+        if (width >= 100) {
+          clearInterval(timer);
+          avancar();
+        } else {
+          width += (10 / tempo) * 100;
+          $(barra).css("width", `${width}%`);
+        }
+      }, 10);
+    }
+
+    function pausarTimer() {
+      isPaused = true;
+    }
+
+    function retomarTimer() {
+      isPaused = false;
+    }
+
+    function avancar() {
+      if (contador < janelas.length) {
+        apagarJanelas();
+        // console.log("avancar ", contador);
+        animacaoBarra(contador);
+        contador++;
+        $(document).find(`[id^=janela_${contador}]`).show();
+        mudarImagemFundo();
+      }
+      mudarBotoes();
+    }
+
+    function voltar() {
+      if (contador > 1) {
+        apagarJanelas();
+        // console.log("voltando ", contador);
+        animacaoBarra(contador - 2);
+        contador--;
+        $(document).find(`[id^=janela_${contador}]`).show();
+        mudarImagemFundo();
+      }
+      mudarBotoes();
+    }
+
+    function mudarImagemFundo() {
+      let srcImagem = null;
+      if ($(janelas[contador - 1]).find("img").length > 0) {
+        srcImagem = $(janelas[contador - 1])
+          .find("img")[0]
+          .getAttribute("src");
+      } else {
+        srcImagem = $(janelas[0]).find("img")[0].getAttribute("src");
+      }
+      $("body").css("background-image", `url(${srcImagem})`);
+    }
+
+    function mudarBotoes() {
+      if (contador == 1) {
+        $(volta).css({
+          opacity: "0.6",
+          cursor: "auto",
+        });
+        $(avanca).css({
+          opacity: "1",
+          cursor: "pointer",
+        });
+      }
+      if (contador == janelas.length) {
+        $(volta).css({
+          opacity: "1",
+          cursor: "pointer",
+        });
+        $(avanca).css({
+          opacity: "0.6",
+          cursor: "auto",
+        });
+      }
+      if (contador > 1 && contador < janelas.length) {
+        $(volta).css({
+          opacity: "1",
+          cursor: "pointer",
+        });
+        $(avanca).css({
+          opacity: "1",
+          cursor: "pointer",
+        });
+      }
+    }
+
+    let botoes = $(document)
+      .find("[id^=botao]")
+      .map((index, botao) => {
+        $(botao).click(() => {
+          apagarJanelas();
+          mudarBotao(index + 1);
+          $(janelas[index + 1]).show();
+        });
+      });
+
+    function apagarJanelas() {
+      janelas.map((index, janela) => {
+        $(janela).hide();
+      });
+    }
+  });
+</script>
